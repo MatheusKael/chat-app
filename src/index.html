@@ -23,6 +23,9 @@
     <script src="../socket.io/socket.io.js"></script> <script>
         
         var socket = io();
+        var name = prompt('Enter your nickname');
+
+        socket.emit("name", name);
 
         var messages = document.getElementById('messages')
         var form = document.getElementById('form')
@@ -36,6 +39,12 @@
         } )
         // For some reason, if there is a console log printing (socket), 
         // the page will refresh...
+           socket.on('chat message', function(msg) {
+    var item = document.createElement('li');
+    item.textContent = msg;
+    messages.appendChild(item);
+    window.scrollTo(0, document.body.scrollHeight);
+  });
     </script>
   </body>
 </html>
