@@ -15,12 +15,17 @@ app.get('/', function(req, res) {
     res.sendFile(__dirname + '/index.html')
 })
 
+
 io.on('connection', (socket) => {
 
     socket.on('name', (nameReceived) =>  { 
         name.set(socket.id, nameReceived);
+        socket.broadcast.emit('chat message', `${nameReceived} has connected to the chat!`)
     } )
 
+    socket.on('typing', (sockerId) => {
+        socket.broadcast.emit("typing", name.get(sockerId))
+    })
     socket.on('chat message', (message) => {
         socket.broadcast.emit("chat message", name.get(socket.id) + '>' + message)
     })

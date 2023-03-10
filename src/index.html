@@ -16,8 +16,10 @@
     </style>
   </head>
   <body>
-    <ul id="messages"></ul>
-    <form id="form" action="">
+    <ul id="messages">
+    <p id="its-hidden-beatch" ></p>
+    </ul>
+    <form id="form" caction="">
       <input id="input" autocomplete="off" /><button>Send</button>
     </form>
     <script src="../socket.io/socket.io.js"></script> <script>
@@ -30,6 +32,21 @@
         var messages = document.getElementById('messages')
         var form = document.getElementById('form')
         var input = document.getElementById('input')
+        var p = document.getElementById('its-hidden-beatch');
+        let timer;    
+
+        input.addEventListener('input', function(e) {
+            socket.emit('typing', socket.id);
+
+        })
+        socket.on('typing', function(user) { 
+            clearTimeout(timer)
+            p.textContent = `${user} is typing`
+            p.style.display = 'block'
+            timer = setTimeout(() => {
+            p.style.display = 'none'
+            }, 1000)
+        })
         form.addEventListener('submit', function(e) {
             e.preventDefault();
             if(input.value) { 
@@ -39,11 +56,10 @@
         } )
         // For some reason, if there is a console log printing (socket), 
         // the page will refresh...
-           socket.on('chat message', function(msg) {
-    var item = document.createElement('li');
-    item.textContent = msg;
-    messages.appendChild(item);
-    window.scrollTo(0, document.body.scrollHeight);
+            socket.on('chat message', function(msg) {
+                var item = document.createElement('li'); 
+                item.textContent = msg; messages.appendChild(item);
+                window.scrollTo(0, document.body.scrollHeight);
   });
     </script>
   </body>
