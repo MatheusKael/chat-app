@@ -10,7 +10,9 @@ const http = new HttpServer(app)
 const io = new Server(http)
 
 // It's in memory, not using database for now
-var name = new Map(); 
+var name = new Map();
+
+var usersOnline: string[] = [];
 
 app.get('/', function(req, res) {
     res.sendFile(__dirname + '/index.html')
@@ -19,16 +21,31 @@ app.get('/', function(req, res) {
 
 io.on('connection', (socket) => {
 
-    socket.on('name', (nameReceived) =>  { 
+    usersOnline.push(socket.id)
+    console.log(socket.id)
+    io.emit("user connected", usersOnline.map((socket_id) => name.get(socket_id) ))
+
+    socket.on('name', (nameReceived) => {
         name.set(socket.id, nameReceived);
         socket.broadcast.emit('chat message', `${nameReceived} has connected to the chat!`)
-    } )
+    })
 
     socket.on('typing', (sockerId) => {
         socket.broadcast.emit("typing", name.get(sockerId))
     })
     socket.on('chat message', (message) => {
         socket.broadcast.emit("chat message", name.get(socket.id) + ' >' + message)
+    })
+
+    socket.on('disconnect', () => {
+
+        socket.broadcast.emit("chat message", name.get(socket.id) + " has disconnected")
+
+        usersOnline.splice(usersOnline.indexOf(socket.id), 1)
+
+        io.emit("user disconnected", usersOnline.map((socket_id) => {
+            return name.get(socket_id)
+        }))
     })
 
 })
